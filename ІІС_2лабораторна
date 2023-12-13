@@ -1,0 +1,74 @@
+
+import pandas as pd
+import matplotlib.pyplot as plt
+data = pd.read_csv('C:/vgsales.csv')
+matplotlib.rcParams.update({'font.size': 22})
+
+# сума продажів в Європі
+top_publishers_europe = data.groupby('Publisher')['EU_Sales'].sum().nlargest(10)
+
+# результати
+print(top_publishers_europe)
+top_publishers_europe.plot(kind='bar')
+plt.xlabel('Видавництво')
+plt.ylabel('Сума продажів в Європі')
+plt.title('ТОП-10 видавництв ігор в Європі')
+plt.show()
+
+
+
+top_game_japan_2015 = data[data['Year'] == 2015].nlargest(1, 'JP_Sales')
+
+total_japan_sales = top_game_japan_2015['JP_Sales'].values[0]
+total_other_sales = top_game_japan_2015[['NA_Sales', 'EU_Sales', 'Other_Sales']].sum().sum()
+
+japan_sales_percentage = (total_japan_sales / (total_japan_sales + total_other_sales)) * 100
+
+# результати
+print("Гра, що найкраще продавалась в Японії в 2015 році:", top_game_japan_2015['Name'].values[0])
+print("Доля продажів цієї гри в Японії:", japan_sales_percentage, "%")
+
+
+
+# РС та PS4
+platforms = ['PS4', 'PC']
+years = list(range(2015, 2024))
+data_filtered = data[data['Platform'].isin(platforms) & data['Year'].isin(years)]
+
+platform_sales = data_filtered.groupby(['Year', 'Platform'])['Global_Sales'].count().unstack()
+
+platform_sales.plot(kind='bar')
+plt.xlabel('Рік')
+plt.ylabel('Кількість проданих ігор')
+plt.title('Кількість проданих ігор на РС та PS4 (2015-2023)')
+plt.legend(title='Платформа')
+plt.show()
+
+
+data_2014 = data[data['Year'] == 2014]
+
+if data_2014[data_2014['EU_Sales'].notna()].empty:
+    print("Немає даних для побудови кругової діаграми жанрів у Європі у 2014 році.")
+else:
+    genre_sales_2014 = data_2014.groupby('Genre')['EU_Sales'].sum()
+
+    genre_sales_2014.plot(kind='pie', autopct='%1.1f%%')
+    plt.axis('equal')
+    plt.title('Доля популярності жанрів ігор в Європі у 2014 році')
+    plt.show() 
+
+cod_data = data[data['Name'].str.contains('Call of Duty', case=False)]  
+bf_data = data[data['Name'].str.contains('Battlefield', case=False)]
+
+cod_global_sales = cod_data.groupby('Year')['Global_Sales'].sum()
+bf_global_sales = bf_data.groupby('Year')['Global_Sales'].sum()
+
+# call of duty
+plt.plot(cod_global_sales.index, cod_global_sales, label='Call of Duty', marker='o')
+plt.plot(bf_global_sales.index, bf_global_sales, label='Battlefield', marker='o')
+plt.xlabel('Рік')
+plt.ylabel('Світові продажі')
+plt.title('Динаміка продажів серій "Call of Duty" та "Battlefield" (2005-2023)')
+plt.legend()
+plt.grid()
+plt.show()
