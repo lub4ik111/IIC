@@ -1,0 +1,77 @@
+import ray
+import matplotlib.pyplot as plt
+import numpy as np
+
+ray.init()
+
+@ray.remote
+def learning_process():
+    rewards = []
+    trajectories = []
+    agent_actions = []
+
+    for i in range(100):
+        reward = 1 / (i + 1) 
+        rewards.append(reward)
+
+        trajectory = np.random.uniform(0, 100)  
+        agent_action = np.random.uniform(0, 100)
+        trajectories.append(trajectory)
+        agent_actions.append(agent_action)
+
+    return rewards, trajectories, agent_actions
+
+result_ids = learning_process.remote()
+
+results = ray.get(result_ids)
+
+rewards, trajectories, agent_actions = results
+
+def visualize_rewards(rewards):
+    plt.figure(figsize=(8, 6))
+    plt.plot(rewards)
+    plt.title('Прогрес винагороди')
+    plt.xlabel('Кроки')
+    plt.ylabel('Винагорода')
+    plt.show()
+
+def visualize_trajectories(trajectories):
+    plt.figure(figsize=(8, 6))
+    plt.plot(trajectories)
+    plt.title('Траєкторії')
+    plt.xlabel('Кроки')
+    plt.ylabel('Траєкторія')
+    plt.show()
+
+def visualize_agent_actions(agent_actions):
+    plt.figure(figsize=(8, 6))
+    plt.plot(agent_actions)
+    plt.title('Дії агента')
+    plt.xlabel('Кроки')
+    plt.ylabel('Дія агента')
+    plt.show()
+
+def visualize_mean_rewards(rewards):
+    mean_rewards = [np.mean(rewards[:i+1]) for i in range(len(rewards))]
+    plt.figure(figsize=(8, 6))
+    plt.plot(mean_rewards)
+    plt.title('Середня винагорода')
+    plt.xlabel('Кроки')
+    plt.ylabel('Середня винагорода')
+    plt.show()
+
+def visualize_reward_std(rewards):
+    reward_std = [np.std(rewards[:i+1]) for i in range(len(rewards))]
+    plt.figure(figsize=(8, 6))
+    plt.plot(reward_std)
+    plt.title('Стандартне відхилення винагород')
+    plt.xlabel('Кроки')
+    plt.ylabel('Стандартне відхилення')
+    plt.show()
+
+# Візуалізація результатів
+visualize_rewards(rewards)
+visualize_trajectories(trajectories)
+visualize_agent_actions(agent_actions)
+visualize_mean_rewards(rewards)
+visualize_reward_std(rewards)
